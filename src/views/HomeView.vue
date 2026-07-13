@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import TopNavBar from '@/components/TopNavBar.vue';
+import { useRoomListStore } from '@/stores/RoomListStore';
+
+const roomListStore = useRoomListStore();
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <TopNavBar />
+  <h1>Game Rooms</h1>
+  
 </template>
