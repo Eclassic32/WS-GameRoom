@@ -35,7 +35,7 @@ app.get('/api/rooms/:id', (req, res) => {
 
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log('[Socket.io] Connected: ', socket.id);
 });
 
 httpServer.listen(3000, () => {
