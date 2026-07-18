@@ -4,6 +4,7 @@ import { useRoomListStore } from '@/stores/RoomListStore';
 import { RouterLink } from 'vue-router';
 
 const roomListStore = useRoomListStore();
+roomListStore.setRoomsFromAPI();
 </script>
 
 <template>
