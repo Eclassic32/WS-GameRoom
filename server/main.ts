@@ -5,9 +5,14 @@ import { activeRooms } from './rooms';
 import cors from 'cors';
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer);
 app.use(cors());
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -35,7 +40,33 @@ app.get('/api/rooms/:id', (req, res) => {
 
 
 io.on('connection', (socket) => {
-    console.log('[Socket.io] Connected: ', socket.id);
+    const userId = socket.id;
+
+    console.log('[🔌] Connected: ', userId);
+
+    socket.on('disconnect', () => {
+        console.log('[🔌] Disconnected: ', userId);
+    });
+
+    socket.on('chat_msg', (msg, roomId) => {
+        if (roomId) {
+            console.log(`[🔌] Room ${roomId} Message: `, msg);
+            io.to(roomId).emit('chat_msg', msg);
+        } else {
+            console.log(`[🔌] Global Message: `, msg);
+            io.emit('chat_msg', msg);
+        }
+    });
+
+    socket.on('join_room', (roomId) => {
+        console.log(`[🔌] User ${userId} joining room: ${roomId}`);
+        socket.join(roomId);
+    });
+
+    socket.on('leave_room', (roomId) => {
+        console.log(`[🔌] User ${userId} leaving room: ${roomId}`);
+        socket.leave(roomId);
+    });
 });
 
 httpServer.listen(3000, () => {

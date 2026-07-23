@@ -15,6 +15,7 @@
     "express": "^4.22.2",
     "pinia": "^3.0.4",
     "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3",
     "tsx": "^4.23.1",
     "vue": "^3.5.38",
     "vue-router": "^5.1.0"
