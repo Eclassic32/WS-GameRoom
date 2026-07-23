@@ -1,0 +1,78 @@
+name: Build and publish
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Vue
+        run: npm run build
+
+      - name: Build and publish to page branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          VUE_OUT="dist"
+          if [ ! -d "$VUE_OUT" ]; then
+          echo "Expected Vue build output directory '$VUE_OUT' not found."
+          exit 1
+          fi
+
+          REPO_URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          git fetch origin page:page || true
+          git checkout -B page origin/page 2>/dev/null || git checkout -B page
+
+          rm -rf ./* ./.??* || true
+          cp -R "$VUE_OUT"/. ./
+
+          if git status --porcelain | grep -q .; then
+          git add -A
+          git commit -m "chore(page): publish vue build from $GITHUB_SHA"
+          else
+          echo "No changes to page contents; skipping commit."
+          fi
+
+          git push -f "$REPO_URL" page:page
+
+      - name: Create subtree-split for server
+        run: |
+          set -euo pipefail
+          git fetch origin server:server || true
+          git subtree split --prefix=server --annotate="server split from main" -b server-tmp
+
+
+      - name: Publish to server branch 
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          REPO_URL="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push -f "$REPO_URL" server-tmp:server
+
