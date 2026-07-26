@@ -1,52 +1,36 @@
-import { placeholderUser, currentUser, type User } from './auth';
-import { type GameOptions } from './game';
+import { placeholderUser, type User } from './auth';
+import type { GameOptions, GameState } from './game';
 
 
 class ActiveRooms {
     private rooms: Map<string, Room> = new Map();
 
     constructor() {
-        testInit();
+        this.testInit();
     }
 
     testInit() {
-        const testRooms = [
+        const options = [
             {
-                id: '1',
-                name: 'Room 1',
-                owner: placeholderUser(1),
-                createdAt: new Date(),
-                public: true,
-                players: [placeholderUser(1)],
-                state: 'waiting',
-                gameState: null,
-                options: {
-                    maxPlayers: 10,
-                    timeLimit: 60,
-                    allowSpectators: true,
-                    rounds: 5
-                }
+                maxPlayers: 10,
+                timeLimit: 60,
+                allowSpectators: true,
+                rounds: 5
             },
             {
-                id: '2',
-                name: 'Room 2',
-                owner: placeholderUser(2),
-                createdAt: new Date('2026-01-01T12:00:00Z'),
-                public: false,
-                players: [placeholderUser(2), placeholderUser(3)],
-                state: 'in-game',
-                gameState: null,
-                options: {
-                    maxPlayers: 8,
-                    timeLimit: 45,
-                    allowSpectators: false,
-                    rounds: 3
-                }
+                maxPlayers: 8,
+                timeLimit: 45,
+                allowSpectators: false,
+                rounds: 3
             }
         ];
-        for (const room of testRooms) {
-            this.rooms.set(room.id, room);
-        }
+        const r1 = new Room('Room 1', placeholderUser(1), true, options[0]);
+        r1.join(placeholderUser(1));
+        const r2 = new Room('Room 2', placeholderUser(2), false, options[1]);
+        r2.join(placeholderUser(2));
+        r2.join(placeholderUser(3));
+        this.addRoom(r1);
+        this.addRoom(r2);
     }
 
     addRoom(room: Room) {
@@ -68,7 +52,7 @@ class ActiveRooms {
 
 export class Room {
     id: string;
-    name: string
+    name: string;
     owner: User;
     createdAt: Date;
     public: boolean;
@@ -85,7 +69,7 @@ export class Room {
         this.public = isPublic;
         this.players = [];
         this.state = 'waiting';
-        this.gameState = null;
+        this.gameState = null; // Rewrite on game start
         this.options = options;
     }
 
