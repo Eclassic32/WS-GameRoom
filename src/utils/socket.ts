@@ -7,6 +7,4 @@ export const state = reactive({
   barEvents: []
 });
 
-const URL = "http://localhost:3000";
-
-export const socket = io(URL);
+export const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3000");

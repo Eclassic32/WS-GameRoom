@@ -4,3 +4,9 @@ export type GameOptions = {
     allowSpectators: boolean;
     rounds: number;
 }
+
+export type GameState = {
+    currentRound: number;
+    scores: Record<string, number>;
+    isGameOver: boolean;
+}

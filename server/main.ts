@@ -1,8 +1,10 @@
 import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import { activeRooms } from './rooms';
 import cors from 'cors';
+
+import { activeRooms } from './rooms';
+import { setupAuthSocket, setupAuthExpress } from './auth';
 
 const app = express();
 app.use(cors());
@@ -37,7 +39,7 @@ app.get('/api/rooms/:id', (req, res) => {
     }
 });
 
-
+setupAuthExpress(app);
 
 io.on('connection', (socket) => {
     const userId = socket.id;
@@ -67,7 +69,10 @@ io.on('connection', (socket) => {
         console.log(`[🔌] User ${userId} leaving room: ${roomId}`);
         socket.leave(roomId);
     });
+
+    setupAuthSocket(socket, io);
 });
+
 
 httpServer.listen(3000, () => {
     console.log('listening on *:3000');
